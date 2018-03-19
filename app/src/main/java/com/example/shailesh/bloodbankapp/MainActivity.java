@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -22,9 +23,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.shailesh.bloodbankapp.Facts.FactsActivity;
 import com.example.shailesh.bloodbankapp.FirebaseDatabase.DonorDatabase;
 import com.example.shailesh.bloodbankapp.FirebaseDatabase.User;
 import com.example.shailesh.bloodbankapp.Login.LoginActivity;
@@ -62,6 +66,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     ActionBarDrawerToggle mToggle;
     NavigationView navigationView;
 
+    //Floating action buttons
+    FloatingActionButton fab, fab1, fab2, fab3, fab4;
+    Animation fabOpen, fabClose, rotateForward, rotateBackward;
+    boolean isOpen = false;
 
     //MAp Activities variables
     private GoogleMap mMap;
@@ -79,10 +87,37 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     Marker marker;
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.navigation_drawer);
+
+        //floating buttons actions
+        fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab1 = (FloatingActionButton) findViewById(R.id.fab1);
+        fab2 = (FloatingActionButton) findViewById(R.id.fab2);
+        fab3 = (FloatingActionButton) findViewById(R.id.fab3);
+        fab4 = (FloatingActionButton) findViewById(R.id.fab4);
+
+        fabOpen = AnimationUtils.loadAnimation(this, R.anim.fab_open);
+        fabClose = AnimationUtils.loadAnimation(this, R.anim.fab_close);
+
+        rotateForward = AnimationUtils.loadAnimation(this, R.anim.rotate_forward);
+        rotateBackward = AnimationUtils.loadAnimation(this, R.anim.rotate_backward);
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                animateFab();
+            }
+        });
+
+
+
+
+
+
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.my_awesome_toolbar);
         setSupportActionBar(toolbar);
@@ -112,6 +147,32 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mUsers.push().setValue(marker);
 
 
+    }
+
+    private void animateFab() {
+        if (isOpen) {
+            fab.startAnimation(rotateForward);
+            fab1.startAnimation(fabClose);
+            fab2.startAnimation(fabClose);
+            fab3.startAnimation(fabClose);
+            fab4.startAnimation(fabClose);
+            fab1.setClickable(false);
+            fab2.setClickable(false);
+            fab3.setClickable(false);
+            fab4.setClickable(false);
+            isOpen = false;
+        } else {
+            fab.startAnimation(rotateBackward);
+            fab1.startAnimation(fabOpen);
+            fab2.startAnimation(fabOpen);
+            fab3.startAnimation(fabOpen);
+            fab4.startAnimation(fabOpen);
+            fab1.setClickable(true);
+            fab2.setClickable(true);
+            fab3.setClickable(true);
+            fab4.setClickable(true);
+            isOpen = true;
+        }
     }
 
     @Override
@@ -155,7 +216,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mMap.setMyLocationEnabled(true);
         }
         googleMap.setOnMarkerClickListener(this);
-        googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
         mUsers.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -164,20 +224,52 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Geocoder gc=new Geocoder(getApplicationContext());
                     List<Address> list = null;
                     try {
-                        list = gc.getFromLocationName(user.address, 1);
+                        list = gc.getFromLocationName(user.address,1);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                     Address address = list.get(0);
-                    String locality = address.getLocality();
-
-
-                    double lat = address.getLatitude();
-                    double lng = address.getLongitude();
+                    final double lat = address.getLatitude();
+                    final double lng = address.getLongitude();
                     MarkerOptions options = new MarkerOptions()
                             .title(user.name)
                             .position(new LatLng(lat,lng));
                     marker=mMap.addMarker(options);
+
+                    fab1.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Toast.makeText(MainActivity.this, "fab1", Toast.LENGTH_SHORT).show();
+
+                        }
+                    });
+                    fab2.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Toast.makeText(MainActivity.this, "fab2", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    fab2.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Toast.makeText(MainActivity.this, "fab2", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    fab3.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Toast.makeText(MainActivity.this, "fab3", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    fab4.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Toast.makeText(MainActivity.this, "fab4", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+
+
                 }
             }
 
@@ -187,6 +279,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
     }
+
 
 
     protected synchronized void bulidGoogleApiClient() {
@@ -382,6 +475,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             case R.id.nav_usrProfile:
                 Toast.makeText(MainActivity.this, "User Profile", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(getApplicationContext(), DonorDatabase.class));
+                break;
+            case R.id.nav_facts:
+                Toast.makeText(MainActivity.this, "Facts", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(getApplicationContext(), FactsActivity.class));
                 break;
 
 

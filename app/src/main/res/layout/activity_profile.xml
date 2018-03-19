@@ -91,33 +91,7 @@
 
         </RelativeLayout>
 
-        <RelativeLayout
-            android:id="@+id/layout_rh"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp">
 
-            <TextView
-                style="@style/RedText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toLeftOf="@+id/spinner_rh"
-                android:layout_alignParentLeft="true"
-                android:textSize="18sp"
-                android:layout_centerVertical="true"
-                android:text="@string/rh_factor" />
-
-            <Spinner
-                android:id="@+id/spinner_rh"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_alignParentRight="true"
-                android:entries="@array/rh" />
-
-        </RelativeLayout>
 
         <EditText
             android:id="@+id/input_additional"

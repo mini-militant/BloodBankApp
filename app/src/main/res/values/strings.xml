@@ -3,7 +3,7 @@
     <string name="facebook_app_id">164937317481694</string>
 
     <string name="title_activity_maps">Map</string>
-
+    <string name="send_to">Share</string>
 
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
@@ -56,10 +56,14 @@
         <item>-</item>
     </string-array>
     <string-array name="blood_type">
-        <item>0</item>
-        <item>A</item>
-        <item>B</item>
-        <item>AB</item>
+        <item>0+</item>
+        <item>A+</item>
+        <item>B+</item>
+        <item>AB+</item>
+        <item>0-</item>
+        <item>A-</item>
+        <item>B-</item>
+        <item>AB-</item>
     </string-array>
     <string-array name="languages">
         <item>en</item>

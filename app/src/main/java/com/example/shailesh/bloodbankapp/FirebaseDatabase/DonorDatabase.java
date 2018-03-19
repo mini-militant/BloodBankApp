@@ -51,7 +51,7 @@ public class DonorDatabase extends AppCompatActivity {
         additionalData=(EditText)findViewById(R.id.input_additional);
 
         gender=(Spinner)findViewById(R.id.spinner_sex);
-        rhFactor=(Spinner)findViewById(R.id.spinner_rh);
+
         bloodType=(Spinner)findViewById(R.id.spinner_blood_type);
         btnSave=(Button)findViewById(R.id.button_save);
 
@@ -88,11 +88,15 @@ public class DonorDatabase extends AppCompatActivity {
                 String Address=address.getText().toString();
                 String additional=additionalData.getText().toString();
 
+                String blood=(String) bloodType.getSelectedItem();
+
+                String sex=(String) gender.getSelectedItem();
+
                 // Check for already existed userId
                 if (TextUtils.isEmpty(userId)) {
-                    createUser(Firstname,Lastname,Address,additional);
+                    createUser(Firstname,Lastname,sex,Address,blood,additional);
                 } else {
-                    updateUser(Firstname,Lastname,Address,additional);
+                    updateUser(Firstname,Lastname,sex,Address,blood,additional);
                 }
             }
         });
@@ -109,7 +113,7 @@ public class DonorDatabase extends AppCompatActivity {
         }
     }
 
-    private void createUser(String Firstname, String Lastname,String Address,String additional) {
+    private void createUser(String Firstname,String Lastname,String gender,String Address,String bloodType,String additional) {
         // TODO
         // In real apps this userId should be fetched
         // by implementing firebase auth
@@ -117,7 +121,7 @@ public class DonorDatabase extends AppCompatActivity {
             userId = mFirebaseDatabase.push().getKey();
         }
 
-        User user = new User(Firstname,Lastname,Address,additional);
+        User user = new User(Firstname,Lastname,gender,Address,bloodType,additional);
 
         mFirebaseDatabase.child(userId).setValue(user);
 
@@ -137,7 +141,8 @@ public class DonorDatabase extends AppCompatActivity {
                     return;
                 }
 
-                Log.e(TAG, "User data is changed!" + user.name + ", " + user.surname + ", " + user.address + ", " + user.additionalData);
+                Log.e(TAG, "User data is changed!" + user.name + ", " + user.surname + ", " + user.gender + ", "
+                        + user.address + ", " +","+user.gender+ "," + user.additionalData);
 
 
 
@@ -157,15 +162,21 @@ public class DonorDatabase extends AppCompatActivity {
             }
         });
     }
-    private void updateUser(String Firstname, String Lastname,String Address,String additional) {
+    private void updateUser(String Firstname,String Lastname,String gender,String Address,String bloodType,String additional) {
         // updating the user via child nodes
         if (!TextUtils.isEmpty(Firstname))
             mFirebaseDatabase.child(userId).child("Firstname").setValue(Firstname);
 
         if (!TextUtils.isEmpty(Lastname))
             mFirebaseDatabase.child(userId).child("Lastname").setValue(Lastname);
+        if (!TextUtils.isEmpty(gender))
+            mFirebaseDatabase.child(userId).child("gender").setValue(gender);
         if (!TextUtils.isEmpty(Address))
             mFirebaseDatabase.child(userId).child("Address").setValue(Address);
+        if (!TextUtils.isEmpty(bloodType))
+            mFirebaseDatabase.child(userId).child("bloodType").setValue(bloodType);
+
+
         if (!TextUtils.isEmpty(additional))
             mFirebaseDatabase.child(userId).child("additional").setValue(additional);
     }
