@@ -29,7 +29,7 @@ import android.widget.Toast;
 
 import com.example.shailesh.bloodbankapp.Facts.FactsActivity;
 import com.example.shailesh.bloodbankapp.FirebaseDatabase.DonorDatabase;
-import com.example.shailesh.bloodbankapp.FirebaseDatabase.User;
+import com.example.shailesh.bloodbankapp.FirebaseDatabase.Donor;
 import com.example.shailesh.bloodbankapp.Login.LoginActivity;
 import com.example.shailesh.bloodbankapp.Login.Register;
 import com.google.android.gms.common.ConnectionResult;
@@ -60,7 +60,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        LocationListener ,NavigationView.OnNavigationItemSelectedListener,GoogleMap.OnMarkerClickListener{
+        LocationListener, NavigationView.OnNavigationItemSelectedListener, GoogleMap.OnMarkerClickListener {
 
     public static final int REQUEST_LOCATION_CODE = 99;
     private static final String TAG = "ViewDatabase";
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     Animation fabOpen, fabClose, rotateForward, rotateBackward;
     boolean isOpen = false;
     int PROXIMITY_RADIUS = 10000;
-    double latitude,longitude;
+    double latitude, longitude;
     Marker marker;
     //MAp Activities variables
     private GoogleMap mMap;
@@ -87,7 +87,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ChildEventListener mChildEventListener;
     private DatabaseReference mUsers;
     //private Query query;
-
 
 
     @Override
@@ -117,18 +116,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-        fab1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        fab1.setOnClickListener(getEventListenerForBloodType("O+"));
+        fab2.setOnClickListener(getEventListenerForBloodType("B+"));
 
-            }
-        });
         Toolbar toolbar = (Toolbar) findViewById(R.id.my_awesome_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Blood Bank");
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-        {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkLocationPermission();
 
         }
@@ -146,23 +141,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         navigationView.setNavigationItemSelectedListener(this);
 
         //Firebase databaseReference
-        mUsers= FirebaseDatabase.getInstance().getReference("users");
+        mUsers = FirebaseDatabase.getInstance().getReference("users");
         mUsers.push().setValue(marker);
-
-        fab1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(getApplicationContext(),"fab1",Toast.LENGTH_SHORT).show();
-
-
-            }
-        });
 
     }
 
+    @NonNull
+    private View.OnClickListener getEventListenerForBloodType(final String bloodTypeValue) {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDonorLocationsFor(bloodTypeValue);
+            }
+        };
+    }
+
     private void animateFab() {
-        FloatingActionButton arrayOfFabs[] = { fab1, fab2, fab3, fab4};
-        for (FloatingActionButton fButton: arrayOfFabs) {
+        FloatingActionButton arrayOfFabs[] = {fab1, fab2, fab3, fab4};
+        for (FloatingActionButton fButton : arrayOfFabs) {
             if (isOpen) {
                 fabRoot.startAnimation(rotateForward);
                 fButton.startAnimation(fabClose);
@@ -179,23 +175,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch(requestCode)
-        {
+        switch (requestCode) {
             case REQUEST_LOCATION_CODE:
-                if(grantResults.length >0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                {
-                    if(ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION) !=  PackageManager.PERMISSION_GRANTED)
-                    {
-                        if(client == null)
-                        {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        if (client == null) {
                             bulidGoogleApiClient();
                         }
                         mMap.setMyLocationEnabled(true);
                     }
-                }
-                else
-                {
-                    Toast.makeText(this,"Permission Denied" , Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(this, "Permission Denied", Toast.LENGTH_LONG).show();
                 }
         }
     }
@@ -223,8 +213,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         showDonorLocationsFor("B+");
     }
 
-    public void showDonorLocationsFor(String bloodType){
-        Query query= this.mUsers.orderByChild("bloodType");
+    public void showDonorLocationsFor(String bloodType) {
+        Query query = this.mUsers.orderByChild("bloodType");
         if (bloodType != ALL_BLOOD_GROUPS) {
             query = query.equalTo(bloodType);
         }
@@ -232,11 +222,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // add element to list of elements
-                    for(DataSnapshot singleDataRow:dataSnapshot.getChildren()){ // 1- 100
-                    User user=singleDataRow.getValue(User.class); // 25
-                    Log.d(TAG, "Value is: " + user);
-                    Log.d(TAG, "bloodType: " + user.getBloodType());
-                    addMarkerForUser(user);
+                mMap.clear();
+                for (DataSnapshot singleDataRow : dataSnapshot.getChildren()) {
+                    Donor donor = singleDataRow.getValue(Donor.class);
+                    Log.d(TAG, "Value is: " + donor);
+                    Log.d(TAG, "bloodType: " + donor.getBloodType());
+                    addMarkerForUser(donor);
                 }
             }
 
@@ -247,11 +238,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
-    private void addMarkerForUser(User user) {
+    private void addMarkerForUser(Donor donor) {
         Geocoder gc = new Geocoder(MainActivity.this);
         List<Address> list = null;
         try {
-            list = gc.getFromLocationName(user.donorAddress, 1);
+            list = gc.getFromLocationName(donor.donorAddress, 1);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -259,9 +250,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         double lat = address.getLatitude();
         double lng = address.getLongitude();
         MarkerOptions options = new MarkerOptions()
-                .title(user.name).snippet(user.phoneNo)
-                .position(new LatLng(lat,lng));
-        marker=mMap.addMarker(options);
+                .title(donor.name).snippet(donor.phoneNo)
+                .position(new LatLng(lat, lng));
+        mMap.addMarker(options);
     }
 
     protected synchronized void bulidGoogleApiClient() {
@@ -276,13 +267,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         latitude = location.getLatitude();
         longitude = location.getLongitude();
         lastlocation = location;
-        if(currentLocationmMarker != null)
-        {
+        if (currentLocationmMarker != null) {
             currentLocationmMarker.remove();
 
         }
-        Log.d("lat = ",""+latitude);
-        LatLng latLng = new LatLng(location.getLatitude() , location.getLongitude());
+        Log.d("lat = ", "" + latitude);
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
         markerOptions.title("Current Location");
@@ -291,37 +281,31 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         mMap.animateCamera(CameraUpdateFactory.zoomBy(10));
 
-        if(client != null)
-        {
-            LocationServices.FusedLocationApi.removeLocationUpdates(client,this);
+        if (client != null) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(client, this);
         }
     }
 
-    public void onClick(View v)
-    {
+    public void onClick(View v) {
         Object dataTransfer[] = new Object[2];
         GetNearbyPlacesData getNearbyPlacesData = new GetNearbyPlacesData();
 
-        switch(v.getId())
-        {
+        switch (v.getId()) {
             case R.id.button:
                 EditText tf_location = (EditText) findViewById(R.id.searchAddress);
                 String location = tf_location.getText().toString();
                 List<Address> addressList;
 
 
-                if(!location.equals(""))
-                {
+                if (!location.equals("")) {
                     Geocoder geocoder = new Geocoder(this);
 
                     try {
                         addressList = geocoder.getFromLocationName(location, 5);
 
-                        if(addressList != null)
-                        {
-                            for(int i = 0;i<addressList.size();i++)
-                            {
-                                LatLng latLng = new LatLng(addressList.get(i).getLatitude() , addressList.get(i).getLongitude());
+                        if (addressList != null) {
+                            for (int i = 0; i < addressList.size(); i++) {
+                                LatLng latLng = new LatLng(addressList.get(i).getLatitude(), addressList.get(i).getLongitude());
                                 MarkerOptions markerOptions = new MarkerOptions();
                                 markerOptions.position(latLng);
                                 markerOptions.title(location);
@@ -362,17 +346,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
-    private String getUrl(double latitude , double longitude , String nearbyPlace)
-    {
+    private String getUrl(double latitude, double longitude, String nearbyPlace) {
 
         StringBuilder googlePlaceUrl = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
-        googlePlaceUrl.append("location="+latitude+","+longitude);
-        googlePlaceUrl.append("&radius="+PROXIMITY_RADIUS);
-        googlePlaceUrl.append("&type="+nearbyPlace);
+        googlePlaceUrl.append("location=" + latitude + "," + longitude);
+        googlePlaceUrl.append("&radius=" + PROXIMITY_RADIUS);
+        googlePlaceUrl.append("&type=" + nearbyPlace);
         googlePlaceUrl.append("&sensor=true");
-        googlePlaceUrl.append("&key="+"AIzaSyCo_N8XuUYknH4qZJnirDz4wosUitQnIOw");
+        googlePlaceUrl.append("&key=" + "AIzaSyCo_N8XuUYknH4qZJnirDz4wosUitQnIOw");
 
-        Log.d("MainActivity", "url = "+googlePlaceUrl.toString());
+        Log.d("MainActivity", "url = " + googlePlaceUrl.toString());
 
         return googlePlaceUrl.toString();
     }
@@ -386,30 +369,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
 
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED)
-        {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             LocationServices.FusedLocationApi.requestLocationUpdates(client, locationRequest, this);
         }
     }
 
 
-    public boolean checkLocationPermission()
-    {
-        if(ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION)  != PackageManager.PERMISSION_GRANTED )
-        {
+    public boolean checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.ACCESS_FINE_LOCATION))
-            {
-                ActivityCompat.requestPermissions(this,new String[] {Manifest.permission.ACCESS_FINE_LOCATION },REQUEST_LOCATION_CODE);
-            }
-            else
-            {
-                ActivityCompat.requestPermissions(this,new String[] {Manifest.permission.ACCESS_FINE_LOCATION },REQUEST_LOCATION_CODE);
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_CODE);
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_CODE);
             }
             return false;
 
-        }
-        else
+        } else
             return true;
     }
 
@@ -421,6 +397,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
     }
+
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -462,8 +439,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Toast.makeText(MainActivity.this, "Facts", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(getApplicationContext(), FactsActivity.class));
                 break;
-
-
 
 
         }

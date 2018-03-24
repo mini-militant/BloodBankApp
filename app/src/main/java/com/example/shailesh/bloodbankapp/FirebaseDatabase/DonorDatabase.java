@@ -119,9 +119,9 @@ public class DonorDatabase extends AppCompatActivity {
             authenticatedConnectionIdentifier = mFirebaseDatabase.push().getKey();
         }
 
-        User user = new User(name, gender, donorAddress, bloodType, additionalData, phoneNo);
+        Donor donor = new Donor(name, gender, donorAddress, bloodType, additionalData, phoneNo);
 
-        mFirebaseDatabase.child(authenticatedConnectionIdentifier).setValue(user);
+        mFirebaseDatabase.child(authenticatedConnectionIdentifier).setValue(donor);
 
         addUserChangeListener();
     }
@@ -131,15 +131,15 @@ public class DonorDatabase extends AppCompatActivity {
         mFirebaseDatabase.child(authenticatedConnectionIdentifier).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                User user = dataSnapshot.getValue(User.class);
+                Donor donor = dataSnapshot.getValue(Donor.class);
 
                 // Check for null
-                if (user == null) {
+                if (donor == null) {
                     Log.e(TAG, "User data is null!");
                     return;
                 }
 
-                Log.e(TAG, "User data is changed!" + user.donorAddress + ", " + user.phoneNo + ", " + user.name + ", " + user.gender + ", " + "," + user.bloodType + "," + user.additionalData);
+                Log.e(TAG, "User data is changed!" + donor.donorAddress + ", " + donor.phoneNo + ", " + donor.name + ", " + donor.gender + ", " + "," + donor.bloodType + "," + donor.additionalData);
 
 
                 // clear edit text

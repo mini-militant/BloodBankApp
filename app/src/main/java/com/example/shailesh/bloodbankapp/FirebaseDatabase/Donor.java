@@ -4,7 +4,7 @@ package com.example.shailesh.bloodbankapp.FirebaseDatabase;
  * Created by shailesh on 11/3/18.
  */
 
-public class User {
+public class Donor {
 
     public String name;
     public String gender;
@@ -14,11 +14,11 @@ public class User {
     public String additionalData;
 
 
-    public User() {
+    public Donor() {
     }
 
 
-    public User(String name, String gender, String donorAddress, String bloodType, String additionalData, String phoneNo) {
+    public Donor(String name, String gender, String donorAddress, String bloodType, String additionalData, String phoneNo) {
         this.name = name;
         this.gender = gender;
         this.donorAddress = donorAddress;
