@@ -78,4 +78,5 @@
     <string name="only_donors">Only donors can use this app.</string>
     <string name="continue_">Continue</string>
     <string name="title_activity_facts">FactsActivity</string>
+    <string name="bloodType">O+</string>
 </resources>

@@ -25,13 +25,13 @@ import com.google.firebase.database.ValueEventListener;
 public class DonorDatabase extends AppCompatActivity {
 
     private static final String TAG = DonorDatabase.class.getSimpleName();
-    private EditText name,surname,address,additionalData;
-    private Spinner gender,bloodType,rhFactor;
+    private EditText name, donorAddress, additionalData, phoneNo;
+    private Spinner gender, bloodType;
     private Button btnSave;
     private DatabaseReference mFirebaseDatabase;
     private FirebaseDatabase mFirebaseInstance;
 
-    private String userId;
+    private String authenticatedConnectionIdentifier;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,21 +39,21 @@ public class DonorDatabase extends AppCompatActivity {
         setContentView(R.layout.activity_profile);
 
         //Displaying Toolbar icon
-        Toolbar toolbar=(Toolbar)findViewById(R.id.my_awesome_toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.my_awesome_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Donor Info");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
-        name=(EditText)findViewById(R.id.input_name);
-        surname=(EditText)findViewById(R.id.input_surname);
-        address=(EditText)findViewById(R.id.input_address);
-        additionalData=(EditText)findViewById(R.id.input_additional);
+        name = (EditText) findViewById(R.id.input_surname);
+        donorAddress = (EditText) findViewById(R.id.input_address);
+        additionalData = (EditText) findViewById(R.id.input_additional);
+        phoneNo = (EditText) findViewById(R.id.input_phone);
 
-        gender=(Spinner)findViewById(R.id.spinner_sex);
+        gender = (Spinner) findViewById(R.id.spinner_sex);
 
-        bloodType=(Spinner)findViewById(R.id.spinner_blood_type);
-        btnSave=(Button)findViewById(R.id.button_save);
+        bloodType = (Spinner) findViewById(R.id.spinner_blood_type);
+        btnSave = (Button) findViewById(R.id.button_save);
 
         mFirebaseInstance = FirebaseDatabase.getInstance();
 
@@ -83,20 +83,20 @@ public class DonorDatabase extends AppCompatActivity {
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String Firstname =name.getText().toString();
-                String Lastname = surname.getText().toString();
-                String Address=address.getText().toString();
-                String additional=additionalData.getText().toString();
+                String donorAddress = DonorDatabase.this.donorAddress.getText().toString();
+                String name = DonorDatabase.this.name.getText().toString();
+                String additionalData = DonorDatabase.this.additionalData.getText().toString();
+                String phoneNo = DonorDatabase.this.phoneNo.getText().toString();
 
-                String blood=(String) bloodType.getSelectedItem();
+                String bloodType = (String) DonorDatabase.this.bloodType.getSelectedItem();
 
-                String sex=(String) gender.getSelectedItem();
+                String gender = (String) DonorDatabase.this.gender.getSelectedItem();
 
-                // Check for already existed userId
-                if (TextUtils.isEmpty(userId)) {
-                    createUser(Firstname,Lastname,sex,Address,blood,additional);
+                // Check for already existed authenticatedConnectionIdentifier
+                if (TextUtils.isEmpty(authenticatedConnectionIdentifier)) {
+                    createUser(name, gender, donorAddress, bloodType, additionalData, phoneNo);
                 } else {
-                    updateUser(Firstname,Lastname,sex,Address,blood,additional);
+                    updateUser(name, gender, donorAddress, bloodType, additionalData, phoneNo);
                 }
             }
         });
@@ -106,31 +106,29 @@ public class DonorDatabase extends AppCompatActivity {
 
     // Changing button text
     private void toggleButton() {
-        if (TextUtils.isEmpty(userId)) {
+        if (TextUtils.isEmpty(authenticatedConnectionIdentifier)) {
             btnSave.setText("Save");
         } else {
             btnSave.setText("Update");
         }
     }
 
-    private void createUser(String Firstname,String Lastname,String gender,String Address,String bloodType,String additional) {
-        // TODO
-        // In real apps this userId should be fetched
-        // by implementing firebase auth
-        if (TextUtils.isEmpty(userId)) {
-            userId = mFirebaseDatabase.push().getKey();
+    private void createUser(String name, String gender, String donorAddress, String bloodType, String additionalData, String phoneNo) {
+
+        if (TextUtils.isEmpty(authenticatedConnectionIdentifier)) {
+            authenticatedConnectionIdentifier = mFirebaseDatabase.push().getKey();
         }
 
-        User user = new User(Firstname,Lastname,gender,Address,bloodType,additional);
+        User user = new User(name, gender, donorAddress, bloodType, additionalData, phoneNo);
 
-        mFirebaseDatabase.child(userId).setValue(user);
+        mFirebaseDatabase.child(authenticatedConnectionIdentifier).setValue(user);
 
         addUserChangeListener();
     }
 
     private void addUserChangeListener() {
         // User data change listener
-        mFirebaseDatabase.child(userId).addValueEventListener(new ValueEventListener() {
+        mFirebaseDatabase.child(authenticatedConnectionIdentifier).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
@@ -141,16 +139,14 @@ public class DonorDatabase extends AppCompatActivity {
                     return;
                 }
 
-                Log.e(TAG, "User data is changed!" + user.name + ", " + user.surname + ", " + user.gender + ", "
-                        + user.address + ", " +","+user.gender+ "," + user.additionalData);
-
+                Log.e(TAG, "User data is changed!" + user.donorAddress + ", " + user.phoneNo + ", " + user.name + ", " + user.gender + ", " + "," + user.bloodType + "," + user.additionalData);
 
 
                 // clear edit text
+                donorAddress.setText("");
                 name.setText("");
-               surname.setText("");
                 additionalData.setText("");
-                address.setText("");
+                donorAddress.setText("");
 
                 toggleButton();
             }
@@ -162,22 +158,20 @@ public class DonorDatabase extends AppCompatActivity {
             }
         });
     }
-    private void updateUser(String Firstname,String Lastname,String gender,String Address,String bloodType,String additional) {
+
+    private void updateUser(String name, String gender, String donorAddress, String bloodType, String additionalData, String phoneNo) {
         // updating the user via child nodes
-        if (!TextUtils.isEmpty(Firstname))
-            mFirebaseDatabase.child(userId).child("Firstname").setValue(Firstname);
-
-        if (!TextUtils.isEmpty(Lastname))
-            mFirebaseDatabase.child(userId).child("Lastname").setValue(Lastname);
+        if (!TextUtils.isEmpty(name))
+            mFirebaseDatabase.child(authenticatedConnectionIdentifier).child("name").setValue(name);
         if (!TextUtils.isEmpty(gender))
-            mFirebaseDatabase.child(userId).child("gender").setValue(gender);
-        if (!TextUtils.isEmpty(Address))
-            mFirebaseDatabase.child(userId).child("Address").setValue(Address);
+            mFirebaseDatabase.child(authenticatedConnectionIdentifier).child("gender").setValue(gender);
+        if (!TextUtils.isEmpty(donorAddress))
+            mFirebaseDatabase.child(authenticatedConnectionIdentifier).child("donorAddress").setValue(donorAddress);
         if (!TextUtils.isEmpty(bloodType))
-            mFirebaseDatabase.child(userId).child("bloodType").setValue(bloodType);
-
-
-        if (!TextUtils.isEmpty(additional))
-            mFirebaseDatabase.child(userId).child("additional").setValue(additional);
+            mFirebaseDatabase.child(authenticatedConnectionIdentifier).child("bloodType").setValue(bloodType);
+        if (!TextUtils.isEmpty(additionalData))
+            mFirebaseDatabase.child(authenticatedConnectionIdentifier).child("additionalData").setValue(additionalData);
+        if (!TextUtils.isEmpty(phoneNo))
+            mFirebaseDatabase.child(authenticatedConnectionIdentifier).child("phoneNo").setValue(phoneNo);
     }
 }

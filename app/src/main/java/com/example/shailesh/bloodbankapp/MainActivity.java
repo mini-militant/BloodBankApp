@@ -13,7 +13,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -51,6 +50,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
@@ -61,30 +61,30 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener ,NavigationView.OnNavigationItemSelectedListener,GoogleMap.OnMarkerClickListener{
 
+    public static final int REQUEST_LOCATION_CODE = 99;
+    private static final String TAG = "ViewDatabase";
     //NavigationView Variable
     DrawerLayout mDrawerLayout;
     ActionBarDrawerToggle mToggle;
     NavigationView navigationView;
-
     //Floating action buttons
     FloatingActionButton fab, fab1, fab2, fab3, fab4;
     Animation fabOpen, fabClose, rotateForward, rotateBackward;
     boolean isOpen = false;
-
+    int PROXIMITY_RADIUS = 10000;
+    double latitude,longitude;
+    Marker marker;
     //MAp Activities variables
     private GoogleMap mMap;
     private GoogleApiClient client;
     private LocationRequest locationRequest;
-    private Location lastlocation;
-    private Marker currentLocationmMarker;
-    public static final int REQUEST_LOCATION_CODE = 99;
-    int PROXIMITY_RADIUS = 10000;
-    double latitude,longitude;
 
     //retrieving from database
+    private Location lastlocation;
+    private Marker currentLocationmMarker;
     private ChildEventListener mChildEventListener;
     private DatabaseReference mUsers;
-    Marker marker;
+    private Query query;
 
 
 
@@ -93,6 +93,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.navigation_drawer);
 
+
+        ChildEventListener mChildEventListener;
         //floating buttons actions
         fab = (FloatingActionButton) findViewById(R.id.fab);
         fab1 = (FloatingActionButton) findViewById(R.id.fab1);
@@ -112,11 +114,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 animateFab();
             }
         });
-
-
-
-
-
 
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.my_awesome_toolbar);
@@ -146,8 +143,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mUsers= FirebaseDatabase.getInstance().getReference("users");
         mUsers.push().setValue(marker);
 
+        fab1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getApplicationContext(),"fab1",Toast.LENGTH_SHORT).show();
+
+
+            }
+        });
 
     }
+
 
     private void animateFab() {
         if (isOpen) {
@@ -216,71 +222,46 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mMap.setMyLocationEnabled(true);
         }
         googleMap.setOnMarkerClickListener(this);
-        mUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+        //googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+
+       mUsers.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for(DataSnapshot s:dataSnapshot.getChildren()){
-                    User user=s.getValue(User.class);
-                    Geocoder gc=new Geocoder(getApplicationContext());
-                    List<Address> list = null;
-                    try {
-                        list = gc.getFromLocationName(user.address,1);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    Address address = list.get(0);
-                    final double lat = address.getLatitude();
-                    final double lng = address.getLongitude();
-                    MarkerOptions options = new MarkerOptions()
-                            .title(user.name)
-                            .position(new LatLng(lat,lng));
-                    marker=mMap.addMarker(options);
-
-                    fab1.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Toast.makeText(MainActivity.this, "fab1", Toast.LENGTH_SHORT).show();
-
-                        }
-                    });
-                    fab2.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Toast.makeText(MainActivity.this, "fab2", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                    fab2.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Toast.makeText(MainActivity.this, "fab2", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                    fab3.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Toast.makeText(MainActivity.this, "fab3", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                    fab4.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Toast.makeText(MainActivity.this, "fab4", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-
-
-
-                }
+                showAddress(dataSnapshot);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                Log.d(TAG, "Value fetching error");
             }
         });
+
+
     }
 
+    public void showAddress(DataSnapshot dataSnapshot){
+        for(DataSnapshot s:dataSnapshot.getChildren()){
+            User user=s.getValue(User.class);
+            Log.d(TAG, "Value is: " + user);
+            Log.d(TAG, "bloodType: " + user.getBloodType());
+            Geocoder gc = new Geocoder(MainActivity.this);
+            List<Address> list = null;
+            try {
 
+                list = gc.getFromLocationName(user.donorAddress, 1);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Address address = list.get(0);
+            double lat = address.getLatitude();
+            double lng = address.getLongitude();
+            MarkerOptions options = new MarkerOptions()
+                    .title(user.name).snippet(user.phoneNo)
+                    .position(new LatLng(lat,lng));
+            marker=mMap.addMarker(options);
+        }
+
+    }
 
     protected synchronized void bulidGoogleApiClient() {
         client = new GoogleApiClient.Builder(this).addConnectionCallbacks(this).addOnConnectionFailedListener(this).addApi(LocationServices.API).build();

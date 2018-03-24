@@ -7,24 +7,28 @@ package com.example.shailesh.bloodbankapp.FirebaseDatabase;
 public class User {
 
     public String name;
-    public String surname;
     public String gender;
-    public String address;
-    //public String rhFactor;
+    public String donorAddress;
+    public String phoneNo;
     public String bloodType;
     public String additionalData;
 
 
-    public User(){
+    public User() {
     }
 
-    public User(String name,String surname,String gender,String address,String bloodType,String additionalData){
-        this.name=name;
-        this.surname=surname;
-        this.gender=gender;
-        this.address=address;
 
-        this.bloodType=bloodType;
-        this.additionalData=additionalData;
+    public User(String name, String gender, String donorAddress, String bloodType, String additionalData, String phoneNo) {
+        this.name = name;
+        this.gender = gender;
+        this.donorAddress = donorAddress;
+        this.bloodType = bloodType;
+        this.additionalData = additionalData;
+        this.phoneNo = phoneNo;
     }
+
+    public String getBloodType(){
+        return bloodType;
+    }
+
 }

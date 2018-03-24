@@ -15,18 +15,18 @@
 
 
         <EditText
-            android:id="@+id/input_name"
+            android:id="@+id/input_address"
             style="@style/TextField"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/name" />
+            android:hint="Address" />
 
         <EditText
             android:id="@+id/input_surname"
             style="@style/TextField"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/surname" />
+            android:hint="FullName" />
 
         <RelativeLayout
             android:id="@+id/layout_sex"
@@ -57,13 +57,14 @@
         </RelativeLayout>
 
         <EditText
-            android:id="@+id/input_address"
+            android:id="@+id/input_phone"
             style="@style/TextField"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/street_address" />
+            android:hint="Phone no" />
 
-        <RelativeLayout
+
+    <RelativeLayout
             android:id="@+id/layout_blood_type"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
