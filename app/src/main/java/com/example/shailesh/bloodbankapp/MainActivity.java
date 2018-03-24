@@ -53,6 +53,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+
 import java.io.IOException;
 import java.util.List;
 
@@ -63,12 +64,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public static final int REQUEST_LOCATION_CODE = 99;
     private static final String TAG = "ViewDatabase";
+    private static final String ALL_BLOOD_GROUPS = "ALL";
     //NavigationView Variable
     DrawerLayout mDrawerLayout;
     ActionBarDrawerToggle mToggle;
     NavigationView navigationView;
     //Floating action buttons
-    FloatingActionButton fab, fab1, fab2, fab3, fab4;
+    FloatingActionButton fabRoot, fab1, fab2, fab3, fab4;
     Animation fabOpen, fabClose, rotateForward, rotateBackward;
     boolean isOpen = false;
     int PROXIMITY_RADIUS = 10000;
@@ -84,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Marker currentLocationmMarker;
     private ChildEventListener mChildEventListener;
     private DatabaseReference mUsers;
-    private Query query;
+    //private Query query;
 
 
 
@@ -96,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         ChildEventListener mChildEventListener;
         //floating buttons actions
-        fab = (FloatingActionButton) findViewById(R.id.fab);
+        fabRoot = (FloatingActionButton) findViewById(R.id.fab);
         fab1 = (FloatingActionButton) findViewById(R.id.fab1);
         fab2 = (FloatingActionButton) findViewById(R.id.fab2);
         fab3 = (FloatingActionButton) findViewById(R.id.fab3);
@@ -108,18 +110,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         rotateForward = AnimationUtils.loadAnimation(this, R.anim.rotate_forward);
         rotateBackward = AnimationUtils.loadAnimation(this, R.anim.rotate_backward);
 
-        fab.setOnClickListener(new View.OnClickListener() {
+        fabRoot.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 animateFab();
             }
         });
 
+        fab1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
+            }
+        });
         Toolbar toolbar = (Toolbar) findViewById(R.id.my_awesome_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Blood Bank");
-
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
         {
@@ -154,31 +160,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-
     private void animateFab() {
-        if (isOpen) {
-            fab.startAnimation(rotateForward);
-            fab1.startAnimation(fabClose);
-            fab2.startAnimation(fabClose);
-            fab3.startAnimation(fabClose);
-            fab4.startAnimation(fabClose);
-            fab1.setClickable(false);
-            fab2.setClickable(false);
-            fab3.setClickable(false);
-            fab4.setClickable(false);
-            isOpen = false;
-        } else {
-            fab.startAnimation(rotateBackward);
-            fab1.startAnimation(fabOpen);
-            fab2.startAnimation(fabOpen);
-            fab3.startAnimation(fabOpen);
-            fab4.startAnimation(fabOpen);
-            fab1.setClickable(true);
-            fab2.setClickable(true);
-            fab3.setClickable(true);
-            fab4.setClickable(true);
-            isOpen = true;
+        FloatingActionButton arrayOfFabs[] = { fab1, fab2, fab3, fab4};
+        for (FloatingActionButton fButton: arrayOfFabs) {
+            if (isOpen) {
+                fabRoot.startAnimation(rotateForward);
+                fButton.startAnimation(fabClose);
+                fButton.setClickable(false);
+
+            } else {
+                fabRoot.startAnimation(rotateBackward);
+                fButton.startAnimation(fabOpen);
+                fButton.setClickable(true);
+            }
         }
+        isOpen = !isOpen;
     }
 
     @Override
@@ -222,45 +218,50 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mMap.setMyLocationEnabled(true);
         }
         googleMap.setOnMarkerClickListener(this);
-        //googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+        //googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);//
+        // last seelcted bloood group type?
+        showDonorLocationsFor("B+");
+    }
 
-       mUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+    public void showDonorLocationsFor(String bloodType){
+        Query query= this.mUsers.orderByChild("bloodType");
+        if (bloodType != ALL_BLOOD_GROUPS) {
+            query = query.equalTo(bloodType);
+        }
+        query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                showAddress(dataSnapshot);
+                // add element to list of elements
+                    for(DataSnapshot singleDataRow:dataSnapshot.getChildren()){ // 1- 100
+                    User user=singleDataRow.getValue(User.class); // 25
+                    Log.d(TAG, "Value is: " + user);
+                    Log.d(TAG, "bloodType: " + user.getBloodType());
+                    addMarkerForUser(user);
+                }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.d(TAG, "Value fetching error");
+
             }
         });
-
-
     }
 
-    public void showAddress(DataSnapshot dataSnapshot){
-        for(DataSnapshot s:dataSnapshot.getChildren()){
-            User user=s.getValue(User.class);
-            Log.d(TAG, "Value is: " + user);
-            Log.d(TAG, "bloodType: " + user.getBloodType());
-            Geocoder gc = new Geocoder(MainActivity.this);
-            List<Address> list = null;
-            try {
-
-                list = gc.getFromLocationName(user.donorAddress, 1);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            Address address = list.get(0);
-            double lat = address.getLatitude();
-            double lng = address.getLongitude();
-            MarkerOptions options = new MarkerOptions()
-                    .title(user.name).snippet(user.phoneNo)
-                    .position(new LatLng(lat,lng));
-            marker=mMap.addMarker(options);
+    private void addMarkerForUser(User user) {
+        Geocoder gc = new Geocoder(MainActivity.this);
+        List<Address> list = null;
+        try {
+            list = gc.getFromLocationName(user.donorAddress, 1);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
+        Address address = list.get(0);
+        double lat = address.getLatitude();
+        double lng = address.getLongitude();
+        MarkerOptions options = new MarkerOptions()
+                .title(user.name).snippet(user.phoneNo)
+                .position(new LatLng(lat,lng));
+        marker=mMap.addMarker(options);
     }
 
     protected synchronized void bulidGoogleApiClient() {
