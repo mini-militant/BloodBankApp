@@ -32,12 +32,13 @@ public class LoginActivity extends AppCompatActivity implements NavigationView.O
     private EditText inputEmail, inputPassword;
     private FirebaseAuth auth;
     // private ProgressBar progressBar;
-    private Button btnLogin, btnRegister;
+    private Button btnLogin, btnSignout;
 
 
     DrawerLayout mDrawerLayout;
     ActionBarDrawerToggle mToggle;
     NavigationView navigationView;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -52,11 +53,13 @@ public class LoginActivity extends AppCompatActivity implements NavigationView.O
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        btnRegister=(Button)findViewById(R.id.button_register);
-        btnRegister.setOnClickListener(new View.OnClickListener() {
+        btnSignout=(Button)findViewById(R.id.button_signout);
+        btnSignout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getApplicationContext(),Register.class));
+                //startActivity(new Intent(getApplicationContext(),Register.class));
+                auth.signOut();
+                Toast.makeText(getApplicationContext(),"signing out..",Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -64,17 +67,16 @@ public class LoginActivity extends AppCompatActivity implements NavigationView.O
         auth = FirebaseAuth.getInstance();
 
         if (auth.getCurrentUser() != null) {
-            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+           // startActivity(new Intent(LoginActivity.this, LoginActivity.class));
+
             finish();
         }
 
         setContentView(R.layout.activity_login);
         inputEmail = (EditText) findViewById(R.id.input_email);
         inputPassword = (EditText) findViewById(R.id.input_password);
-        //progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        // btnSignup = (Button) findViewById(R.id.btn_signup);
+
         btnLogin = (Button) findViewById(R.id.button_login);
-        // btnReset = (Button) findViewById(R.id.btn_reset_password);
 
 
         //get firebase  auth instance
@@ -149,4 +151,6 @@ public class LoginActivity extends AppCompatActivity implements NavigationView.O
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+
 }

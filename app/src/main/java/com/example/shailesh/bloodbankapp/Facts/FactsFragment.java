@@ -1,6 +1,7 @@
 package com.example.shailesh.bloodbankapp.Facts;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -105,7 +106,7 @@ public class FactsFragment extends Fragment {
             super(v);
             facts = (TextView) v.findViewById(R.id.TextFacts);
             likeImageView = (ImageView) v.findViewById(R.id.likeImageView);
-            shareImageView = (ImageView) v.findViewById(R.id.shareImageView);
+
             likeImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -130,36 +131,6 @@ public class FactsFragment extends Fragment {
 
                 }
             });
-
-
-
-            shareImageView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-
-
-
-
-
-                   /* Uri imageUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE +
-                            "://" + getResources().getResourcePackageName(coverImageView.getId())
-                            + '/' + "drawable" + '/' + getResources().getResourceEntryName((int)coverImageView.getTag()));*/
-
-
-                    Intent shareIntent = new Intent();
-                    shareIntent.setAction(Intent.ACTION_SEND);
-                    //shareIntent.putExtra(Intent.EXTRA_STREAM,imageUri);
-                    shareIntent.setType("image/jpeg");
-                    startActivity(Intent.createChooser(shareIntent, getResources().getText(R.string.send_to)));
-
-
-
-                }
-            });
-
-
-
         }
     }
 

@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     ActionBarDrawerToggle mToggle;
     NavigationView navigationView;
     //Floating action buttons
-    FloatingActionButton fabRoot, fab1, fab2, fab3, fab4;
+    FloatingActionButton fabRoot, fab1, fab2, fab3, fab4,fab5,fab6,fab7,fab8;
     Animation fabOpen, fabClose, rotateForward, rotateBackward;
     boolean isOpen = false;
     int PROXIMITY_RADIUS = 10000;
@@ -102,6 +102,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         fab2 = (FloatingActionButton) findViewById(R.id.fab2);
         fab3 = (FloatingActionButton) findViewById(R.id.fab3);
         fab4 = (FloatingActionButton) findViewById(R.id.fab4);
+        fab5 = (FloatingActionButton) findViewById(R.id.fab5);
+        fab6 = (FloatingActionButton) findViewById(R.id.fab6);
+        fab7 = (FloatingActionButton) findViewById(R.id.fab7);
+        fab8 = (FloatingActionButton) findViewById(R.id.fab8);
 
         fabOpen = AnimationUtils.loadAnimation(this, R.anim.fab_open);
         fabClose = AnimationUtils.loadAnimation(this, R.anim.fab_close);
@@ -118,6 +122,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         fab1.setOnClickListener(getEventListenerForBloodType("O+"));
         fab2.setOnClickListener(getEventListenerForBloodType("B+"));
+        fab3.setOnClickListener(getEventListenerForBloodType("A+"));
+        fab4.setOnClickListener(getEventListenerForBloodType("AB+"));
+        fab5.setOnClickListener(getEventListenerForBloodType("O-"));
+        fab6.setOnClickListener(getEventListenerForBloodType("B-"));
+        fab7.setOnClickListener(getEventListenerForBloodType("A-"));
+        fab8.setOnClickListener(getEventListenerForBloodType("AB-"));
+
+
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.my_awesome_toolbar);
         setSupportActionBar(toolbar);
@@ -157,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void animateFab() {
-        FloatingActionButton arrayOfFabs[] = {fab1, fab2, fab3, fab4};
+        FloatingActionButton arrayOfFabs[] = {fab1, fab2, fab3, fab4,fab5,fab6,fab7,fab8};
         for (FloatingActionButton fButton : arrayOfFabs) {
             if (isOpen) {
                 fabRoot.startAnimation(rotateForward);
