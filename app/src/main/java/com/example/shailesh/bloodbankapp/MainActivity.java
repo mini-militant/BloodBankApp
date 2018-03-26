@@ -222,7 +222,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         googleMap.setOnMarkerClickListener(this);
         //googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);//
         // last seelcted bloood group type?
-        showDonorLocationsFor("B+");
+        showDonorLocationsFor(ALL_BLOOD_GROUPS);
     }
 
     public void showDonorLocationsFor(String bloodType) {
@@ -257,12 +257,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             list = gc.getFromLocationName(donor.donorAddress, 1);
         } catch (IOException e) {
             e.printStackTrace();
+            System.out.println("Some error occurred in reading donor address for:" + donor.name );
+            // toaster - network error try again
+            return ;
+        }
+        if (list.size() == 0) {
+            System.out.println("No address returned for given donor:" + donor.name );
+            return;
         }
         Address address = list.get(0);
         double lat = address.getLatitude();
         double lng = address.getLongitude();
         MarkerOptions options = new MarkerOptions()
-                .title(donor.name).snippet(donor.phoneNo)
+                .title(donor.name)
+                .snippet(donor.phoneNo)
                 .position(new LatLng(lat, lng));
         mMap.addMarker(options);
     }
@@ -291,7 +299,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
         currentLocationmMarker = mMap.addMarker(markerOptions);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomBy(10));
+        mMap.animateCamera(CameraUpdateFactory.zoomBy(13));
 
         if (client != null) {
             LocationServices.FusedLocationApi.removeLocationUpdates(client, this);
@@ -323,7 +331,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 markerOptions.title(location);
                                 mMap.addMarker(markerOptions);
                                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                                mMap.animateCamera(CameraUpdateFactory.zoomTo(10));
+                                mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
                             }
                         }
                     } catch (IOException e) {

@@ -13,9 +13,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-/**
- * @author Priyanka
- */
 
 class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
 

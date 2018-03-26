@@ -23,10 +23,11 @@
             android:id="@+id/searchAddress"/>
         <Button
             android:id="@+id/button"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onClick"
-            android:text="Button" />
+            android:text="Search"
+            />
     </LinearLayout>
 
     <LinearLayout
@@ -38,13 +39,15 @@
             android:id="@+id/hospital"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Hospitals"/>
+            android:text="Hospitals"
+            />
+
         <Button
-            android:onClick="onClick"
             android:id="@+id/bloodbank"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="BloodBank"/>
+            android:onClick="onClick"
+            android:text="BloodBank" />
     </LinearLayout>
 
     <LinearLayout
@@ -70,6 +73,7 @@
                 android:layout_marginRight="@dimen/fab_margin"
                 android:src="@drawable/o_positive"
                 android:visibility="invisible"
+                android:scaleType="centerInside"
                 />
 
             <android.support.design.widget.FloatingActionButton
@@ -152,7 +156,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|end"
                 android:layout_margin="@dimen/fab_margin"
-                android:src="@drawable/ic_add_black_24dp" />
+                android:src="@drawable/ic_add_black_24dp"
+                android:scaleType="center"/>
 
         </fragment>
 

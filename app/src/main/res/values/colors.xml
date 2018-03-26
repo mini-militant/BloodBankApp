@@ -6,4 +6,5 @@
     <color name="transparent_black_ten_percent">#1A000000</color>
     <color name="gray">#a7a9ac</color>
     <color name="dark_gray">#383b40</color>
+    <color name="button_color">#40728e</color>
 </resources>
